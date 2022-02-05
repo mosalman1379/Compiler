@@ -12,70 +12,108 @@ import Lexer.Token;
 import Lexer.TokenType;
 
 public class Parser {
+    //lexer Element for parsing code
     private Lexer lexer;
+    //Token element for store current token
     private Token token;
+    //errorToken element for store invalid token
     private Token errorToken;
 
-    // hash table for operator precedence levels
-    private final static Map<TokenType, Integer> binopLevels;
+    // this hash table used for procedure of operators
+    private final static Map<TokenType, Integer> BinaryOperationLevels;
 
-    private ArrayList<VarDecl> decelarations; //declarations symbol table
-    private ArrayList<Identifier> identifiers; //identifiers symbol table
-    private ArrayList<Assign> assigns; //assigns symbol table
-    private ArrayList<Exp> conditions; //conditions symbol table
+    private ArrayList<VarDecl> Declarations; //symbol table for declarations
 
+    private ArrayList<Identifier> Identifier; //symbol table for identifiers
+
+    private ArrayList<Assign> Assignments; //symbol table for assignments
+
+    private ArrayList<Exp> Conditions; //symbol table for conditions
+
+    //this integer value hold count of errors
     private int errors;
 
     static {
-        binopLevels = new HashMap<TokenType, Integer>();
-        binopLevels.put(TokenType.AND, 10);
-        binopLevels.put(TokenType.OR, 10);
-        binopLevels.put(TokenType.LT, 20);
-        binopLevels.put(TokenType.RT, 20);
-        binopLevels.put(TokenType.LT_EQ, 20);
-        binopLevels.put(TokenType.RT_EQ, 20);
-        binopLevels.put(TokenType.EQ, 20);
-        binopLevels.put(TokenType.NEQ, 20);
-        binopLevels.put(TokenType.PLUS, 30);
-        binopLevels.put(TokenType.MINUS, 30);
-        binopLevels.put(TokenType.TIMES, 40);
-        binopLevels.put(TokenType.DIV, 40);
-        binopLevels.put(TokenType.MOD, 40);
-        binopLevels.put(TokenType.LBRACKET, 50);
+        //in this section we add operators with procedure in increasing order
+        //numbers are random but we must order between operators
+
+        BinaryOperationLevels = new HashMap<TokenType, Integer>();
+
+        BinaryOperationLevels.put(TokenType.AND, 10);
+
+        BinaryOperationLevels.put(TokenType.OR, 10);
+
+        BinaryOperationLevels.put(TokenType.LT, 20);
+
+        BinaryOperationLevels.put(TokenType.RT, 20);
+
+        BinaryOperationLevels.put(TokenType.LT_EQ, 20);
+
+        BinaryOperationLevels.put(TokenType.RT_EQ, 20);
+
+        BinaryOperationLevels.put(TokenType.EQ, 20);
+
+        BinaryOperationLevels.put(TokenType.NEQ, 20);
+
+        BinaryOperationLevels.put(TokenType.PLUS, 30);
+
+        BinaryOperationLevels.put(TokenType.MINUS, 30);
+
+        BinaryOperationLevels.put(TokenType.TIMES, 40);
+
+        BinaryOperationLevels.put(TokenType.DIV, 40);
+
+        BinaryOperationLevels.put(TokenType.MOD, 40);
+
+        BinaryOperationLevels.put(TokenType.LBRACKET, 50);
+
     }
 
+    //in this method parser begins parsing process
     public Parser(FileReader file) throws IOException {
+        //we pass fileReader to lexer object
         this.lexer = new Lexer(file);
+
+        //we get first token of this token and hold it to token variable
         this.token = lexer.getToken();
-        this.decelarations = new ArrayList<>();
-        this.identifiers = new ArrayList<>();
-        this.assigns = new ArrayList<>();
-        this.conditions = new ArrayList<>();
+
+
+        //initializations
+        this.Declarations = new ArrayList<>();
+
+        this.Identifier = new ArrayList<>();
+
+        this.Assignments = new ArrayList<>();
+
+        this.Conditions = new ArrayList<>();
+
     }
 
-    // verifies current token type and grabs next token or reports error
-    private boolean eat(TokenType type) throws IOException {
+
+    // verifies current token type or reports error
+    private boolean CheckType(TokenType type) throws IOException {
         if (token.getType() == type) {
             token = lexer.getToken();
             return true;
         } else {
-            error(type);
+            ShowError(type);
             return false;
         }
     }
 
     // reports an error to the console
-    private void error(TokenType type) {
-        // only report error once per erroneous token
+    private void ShowError(TokenType type) {
         if (token == errorToken)
             return;
 
-        // print error report
         System.err.print("ERROR: " + token.getType());
+
         System.err.print(" at line " + token.getLineNumber() + ", column " + token.getColumnNumber());
+
         System.err.println("; Expected " + type);
 
         errorToken = token; // set error token to prevent cascading
+
         errors++; // increment error counter
     }
 
@@ -90,44 +128,53 @@ public class Parser {
         }
     }
 
-    // number of reported syntax errors
     public int getErrors() {
         return errors;
     }
 
-    public ArrayList<VarDecl> getDecelarations() {
-        return decelarations;
+    public ArrayList<VarDecl> getDeclarations() {
+        return Declarations;
     }
 
-    public ArrayList<Identifier> getIdentifiers() {
-        return identifiers;
+    public ArrayList<Identifier> getIdentifier() {
+        return Identifier;
     }
 
-    public ArrayList<Assign> getAssigns() {
-        return assigns;
+    public ArrayList<Assign> getAssignments() {
+        return Assignments;
     }
 
     public ArrayList<Exp> getConditions() {
-        return conditions;
+        return Conditions;
     }
 
     // Program ::= int main '('')' { Declarations StatementList }
     public Program parseProgram() throws IOException {
-        eat(TokenType.INT);
-        eat(TokenType.MAIN);
-        eat(TokenType.LPAREN);
-        eat(TokenType.RPAREN);
-        eat(TokenType.LBRACE);
+        //first we check main function syntax is true or not
+        CheckType(TokenType.INT);
+
+        CheckType(TokenType.MAIN);
+
+        CheckType(TokenType.LPAREN);
+
+        CheckType(TokenType.RPAREN);
+
+        CheckType(TokenType.LBRACE);
 
         Declarations declarations = parseDeclarations();
+
         StatementList statementList = parseStatementList();
 
-        eat(TokenType.RBRACE);
-        eat(TokenType.EOF);
+        //check we have } at the end of main function
+        CheckType(TokenType.RBRACE);
+        //check we have EOF at the end of main function
+        CheckType(TokenType.EOF);
+
         return new Program(statementList, declarations);
     }
 
-    // Declarations ::= { VarDeclList }
+
+    //in this method we add each declaration to declarations list
     private Declarations parseDeclarations() throws IOException {
         Declarations declarations = new Declarations();
 
@@ -138,130 +185,142 @@ public class Parser {
         return declarations;
     }
 
-    // VarDeclList ::= VarDecl { , Identifier };
+
+    //in this method we check all variable that declare
+    //are same type or not for example int a,b,f;
     private VarDeclList parseVarDecList() throws IOException {
+
         VarDeclList varDeclList = new VarDeclList();
+
         VarDecl varDecl = parseVarDecl();
+
         varDeclList.addElement(varDecl);
-        getDecelarations().add(varDecl);
+
+        getDeclarations().add(varDecl);
+
 
         // check for additional varDecl
         while (token.getType() == TokenType.COMMA) {
-            eat(TokenType.COMMA);
+
+            CheckType(TokenType.COMMA);
+
             VarDecl newVarDecl = new VarDecl(varDecl.getType(), parseIdentifier());
+
             varDeclList.addElement(newVarDecl);
-            getDecelarations().add(newVarDecl);
+
+            getDeclarations().add(newVarDecl);
+
         }
-        eat(TokenType.SEMI);
+
+        CheckType(TokenType.SEMI);
 
         return varDeclList;
     }
 
-    // VarDecl ::= Type Identifier
+
     private VarDecl parseVarDecl() throws IOException {
+
         Type type = parseType();
+
         Identifier id = parseIdentifier();
+
         return new VarDecl(type, id);
+
     }
 
-    /*
-     * Type ::= int | int '['integer']' | float | float'['integer']' | boolean | boolean'['integer']' | char | char'['integer']'
-     * int (IntegerType)
-     * int [integer] (IntArrayType)
-     * float (FloatType)
-     * float[integer] (FloatArrayType)
-     * boolean (BooleanType)
-     * boolean[integer] (BooleanArrayType)
-     */
+    //in this method we parse token value and identify type of token
     private Type parseType() throws IOException {
         switch (token.getType()) {
 
             case INT:
-                eat(TokenType.INT);
+                CheckType(TokenType.INT);
 
                 if (token.getType() == TokenType.LBRACKET) {
-                    eat(TokenType.LBRACKET);
+                    CheckType(TokenType.LBRACKET);
 
-                    if (eat(TokenType.INT_CONST)) {
+                    if (CheckType(TokenType.INT_CONST)) {
                         if (token.getType() == TokenType.RBRACKET) {
-                            eat(TokenType.RBRACKET);
+                            CheckType(TokenType.RBRACKET);
                             return new IntegerArrayType();
                         }
                     }
 
-                    eat(TokenType.TYPE);
+                    CheckType(TokenType.TYPE);
                     return null;
                 }
                 return new IntegerType();
 
             case FLOAT:
-                eat(TokenType.FLOAT);
+                CheckType(TokenType.FLOAT);
 
                 if (token.getType() == TokenType.LBRACKET) {
-                    eat(TokenType.LBRACKET);
+                    CheckType(TokenType.LBRACKET);
 
-                    if (eat(TokenType.INT_CONST)) {
+                    if (CheckType(TokenType.INT_CONST)) {
                         if (token.getType() == TokenType.RBRACKET) {
-                            eat(TokenType.RBRACKET);
+                            CheckType(TokenType.RBRACKET);
                             return new FloatArrayType();
                         }
                     }
 
-                    eat(TokenType.TYPE);
+                    CheckType(TokenType.TYPE);
                     return null;
                 }
                 return new FloatType();
 
             case BOOLEAN:
-                eat(TokenType.BOOLEAN);
+                CheckType(TokenType.BOOLEAN);
 
                 if (token.getType() == TokenType.LBRACKET) {
-                    eat(TokenType.LBRACKET);
+                    CheckType(TokenType.LBRACKET);
 
-                    if (eat(TokenType.INT_CONST)) {
+                    if (CheckType(TokenType.INT_CONST)) {
                         if (token.getType() == TokenType.RBRACKET) {
-                            eat(TokenType.RBRACKET);
+                            CheckType(TokenType.RBRACKET);
                             return new BooleanArrayType();
                         }
                     }
 
-                    eat(TokenType.TYPE);
+                    CheckType(TokenType.TYPE);
                     return null;
                 }
                 return new BooleanType();
 
             case CHAR:
-                eat(TokenType.CHAR);
+                CheckType(TokenType.CHAR);
 
                 if (token.getType() == TokenType.LBRACKET) {
-                    eat(TokenType.LBRACKET);
+                    CheckType(TokenType.LBRACKET);
 
-                    if (eat(TokenType.INT_CONST)) {
+                    if (CheckType(TokenType.INT_CONST)) {
                         if (token.getType() == TokenType.RBRACKET) {
-                            eat(TokenType.RBRACKET);
+                            CheckType(TokenType.RBRACKET);
                             return new CharArrayType();
                         }
                     }
 
-                    eat(TokenType.TYPE);
+                    CheckType(TokenType.TYPE);
                     return null;
                 }
                 return new CharType();
 
             default:
-                eat(TokenType.TYPE);
+                CheckType(TokenType.TYPE);
                 return null;
 
         }
     }
 
+    //in this method we parse identifier and verify it
     private Identifier parseIdentifier() throws IOException {
+        //begins with null value to identifier
         Identifier identifier = null;
 
+        //check token type is same with ID type
         if (token.getType() == TokenType.ID)
-            identifier = new Identifier(token.getAttribute().getIdVal());
+            identifier = new Identifier(token.getAttribute().getIdentifierValue());
 
-        eat(TokenType.ID);
+        CheckType(TokenType.ID);
 
         return identifier;
     }
@@ -273,6 +332,7 @@ public class Parser {
         return statementList;
     }
 
+    //if current token is each of below item it is statement
     private boolean isStatement() {
         switch (token.getType()) {
             case SEMI:
@@ -290,281 +350,307 @@ public class Parser {
     private Statement parseStatement() throws IOException {
 
         if (token.getType() == TokenType.IF) {
-            eat(TokenType.IF);
+            CheckType(TokenType.IF);
 
-            // parse conditional expression
-            if (!eat(TokenType.LPAREN))
+
+            //in this condition if we have space we ignore it
+            if (!CheckType(TokenType.LPAREN))
                 skipTo(TokenType.RPAREN, TokenType.LBRACE, TokenType.RBRACE);
 
+            // parse conditional expression
             Exp condExp = parseExp();
-            conditions.add(condExp);
-			
-			/*if(condExp instanceof IdentifierExp){
-				IdentifierExp idExp = (IdentifierExp) condExp;
-				Identifier identifier = new Identifier(idExp.getName());
-				identifiers.add(identifier);
-			}*/
+            Conditions.add(condExp);
 
-            if (!eat(TokenType.RPAREN))
+            if (!CheckType(TokenType.RPAREN))
                 skipTo(TokenType.LBRACE, TokenType.SEMI, TokenType.RBRACE);
 
-            // parse true and false statements
+            // parse true statements
             Statement trueStm;
 
-            // BLock ::= '{' StatementList '}'
+            //if we have { we parse in block level
             if (token.getType() == TokenType.LBRACE)
                 trueStm = parseBlock();
 
             else
-                // parse true statement
+                // parse true statement in statement level
                 trueStm = parseStatement();
 
             if (token.getType() == TokenType.ELSE) {
-                if (!eat(TokenType.ELSE))
+                if (!CheckType(TokenType.ELSE))
                     skipTo(TokenType.LBRACE, TokenType.SEMI, TokenType.RBRACE);
 
+                //parse false statements
                 Statement falseStm;
 
-                // BLock ::= '{' StatementList '}'
+                //if we have { we parse in block level
                 if (token.getType() == TokenType.LBRACE)
                     falseStm = parseBlock();
 
+
                 else
-                    // parse false statement
+                    //if we have { we parse in statement level
                     falseStm = parseStatement();
 
                 return new If(condExp, trueStm, falseStm);
+
             }
             return new If(condExp, trueStm, null);
         }
 
-        // WhileStatement ::= while '('Exp')' Statement
+        // WhileStatement
         if (token.getType() == TokenType.WHILE) {
-            eat(TokenType.WHILE);
+            CheckType(TokenType.WHILE);
 
-            // parse looping condition
-            if (!eat(TokenType.LPAREN))
+            // parse loop condition
+            if (!CheckType(TokenType.LPAREN))
                 skipTo(TokenType.RPAREN, TokenType.LBRACE, TokenType.RBRACE);
 
+            //parse expresion and add to condition list
             Exp condExp = parseExp();
-            conditions.add(condExp);
-			
-			/*if(condExp instanceof IdentifierExp){
-				IdentifierExp idExp = (IdentifierExp) condExp;
-				Identifier identifier = new Identifier(idExp.getName());
-				identifiers.add(identifier);
-			}*/
+            Conditions.add(condExp);
 
-            if (!eat(TokenType.RPAREN))
+            if (!CheckType(TokenType.RPAREN))
                 skipTo(TokenType.LBRACE, TokenType.SEMI, TokenType.RBRACE);
 
+            //parse loop statements
             Statement loopStm;
 
-            // BLock ::= '{' StatementList '}'
+            // parsing in block level
             if (token.getType() == TokenType.LBRACE)
                 loopStm = parseBlock();
 
             else
-                // parse looping statement
+                // parse loop statement
                 loopStm = parseStatement();
 
             return new While(condExp, loopStm);
         }
 
-        // Identifier statement
+        // if current token is Identifier
         if (token.getType() == TokenType.ID) {
 
-            Identifier id = new Identifier(token.getAttribute().getIdVal());
-            identifiers.add(id);
-            eat(TokenType.ID);
+            //we make identifier with its attributes
+            Identifier id = new Identifier(token.getAttribute().getIdentifierValue());
+            //add id to Identifier list
+            Identifier.add(id);
 
+            CheckType(TokenType.ID);
 
-            // Assignment statement: id = Exp ;
+            //if current token is assignment check it is valid or not
             if (token.getType() == TokenType.ASSIGN) {
-                eat(TokenType.ASSIGN);
-                Exp value = parseExp();
-				
-				/*if(value instanceof IdentifierExp){
-					IdentifierExp idExp = (IdentifierExp) value;
-					Identifier identifier = new Identifier(idExp.getName());
-					identifiers.add(identifier);
-				}*/
 
-                eat(TokenType.SEMI);
+                CheckType(TokenType.ASSIGN);
+
+                Exp value = parseExp();
+
+                CheckType(TokenType.SEMI);
+
 
                 Assign assign = new Assign(id, value);
-                assigns.add(assign);
+
+                Assignments.add(assign);
+
                 return assign;
             }
 
-            // Array value assignment statement: id [ Exp ] = Exp ;
+            // checking arraay assignment exp: id [ Exp ] = Exp ;
             if (token.getType() == TokenType.LBRACKET) {
-                eat(TokenType.LBRACKET);
+
+                CheckType(TokenType.LBRACKET);
+
                 Exp index = parseExp();
 
                 if (!(index instanceof IntegerLiteral)) {
-                    // statement type unknown
-                    eat(TokenType.TYPE);
+
+                    CheckType(TokenType.TYPE);
+
                     token = lexer.getToken();
+
                     return null;
                 }
 
-                if (!eat(TokenType.RBRACKET))
+                if (!CheckType(TokenType.RBRACKET))
                     skipTo(TokenType.ASSIGN, TokenType.SEMI);
 
-                if (!eat(TokenType.ASSIGN))
+                if (!CheckType(TokenType.ASSIGN))
                     skipTo(TokenType.SEMI);
 
                 Exp value = parseExp();
-				
-				/*if(value instanceof IdentifierExp){
-					IdentifierExp idExp = (IdentifierExp) value;
-					Identifier identifier = new Identifier(idExp.getName());
-					identifiers.add(identifier);
-				}*/
 
-                eat(TokenType.SEMI);
+                //checking ; at the end of expression
+                CheckType(TokenType.SEMI);
 
+                //checking array assignment
                 Assign assign = new Assign(id, value);
-                assigns.add(assign);
+                Assignments.add(assign);
                 return new ArrayAssign(id, index, value);
             }
         }
 
-        eat(TokenType.STATEMENT);
+        CheckType(TokenType.STATEMENT);
+
         token = lexer.getToken();
+
         return null;
     }
 
+    private Exp parseExp() throws IOException {
+        Exp lhs = parsePrimaryExp();
+        return parseBinaryOperationRHS(0, lhs);
+    }
+
+
     private Block parseBlock() throws IOException {
-        eat(TokenType.LBRACE);
+        CheckType(TokenType.LBRACE);
         StatementList stms = new StatementList();
         while (token.getType() != TokenType.RBRACE && token.getType() != TokenType.EOF)
             stms.addElement(parseStatement());
 
-        if (!eat(TokenType.RBRACE))
+        if (!CheckType(TokenType.RBRACE))
             skipTo(TokenType.RBRACE, TokenType.SEMI);
 
         return new Block(stms);
     }
 
-    private Exp parseExp() throws IOException {
-        Exp lhs = parsePrimaryExp();
-        return parseBinopRHS(0, lhs);
-    }
 
     private Exp parsePrimaryExp() throws IOException {
+        // check this token is INT_CONST, Boolean or ...
         switch (token.getType()) {
 
-            case INT_CONST:
-                int intValue = token.getAttribute().getIntVal();
-                eat(TokenType.INT_CONST);
-                return new IntegerLiteral(intValue);
-
             case BOOLEAN_CONST:
-                boolean booleanVal = token.getAttribute().getBooleanVal();
-                eat(TokenType.BOOLEAN_CONST);
+
+                boolean booleanVal = token.getAttribute().getBooleanValue();
+
+                CheckType(TokenType.BOOLEAN_CONST);
+
                 return new BooleanLiteral(booleanVal);
 
+            case INT_CONST:
+                int intValue = token.getAttribute().getIntValue();
+
+                CheckType(TokenType.INT_CONST);
+
+                return new IntegerLiteral(intValue);
+
             case FLOAT_CONST:
-                float floatValue = token.getAttribute().getFloatVal();
-                eat(TokenType.FLOAT_CONST);
+
+                float floatValue = token.getAttribute().getFloatValue();
+
+                CheckType(TokenType.FLOAT_CONST);
+
                 return new FloatLiteral(floatValue);
 
             case CHAR_CONST:
-                char charVal = token.getAttribute().getCharVal();
-                eat(TokenType.CHAR_CONST);
+
+                char charVal = token.getAttribute().getCharvalue();
+
+                CheckType(TokenType.CHAR_CONST);
+
                 return new CharLiteral(charVal);
 
             case ID:
+
                 Identifier id = parseIdentifier();
-                identifiers.add(id);
+
+                Identifier.add(id);
+
                 return new IdentifierExp(id.getName());
 
+            case LPAREN:
+
+                CheckType(TokenType.LPAREN);
+
+                Exp exp = parseExp();
+
+                CheckType(TokenType.RPAREN);
+
+                return exp;
+
             case NOT:
-                eat(TokenType.NOT);
+
+                CheckType(TokenType.NOT);
+
                 return new Not(parseExp());
 
             case NEGATIVE:
-                eat(TokenType.NEGATIVE);
+
+                CheckType(TokenType.NEGATIVE);
+
                 return new Negative(parseExp());
 
-            case LPAREN:
-                eat(TokenType.LPAREN);
-                Exp exp = parseExp();
-                eat(TokenType.RPAREN);
-                return exp;
 
             default:
-                eat(TokenType.EXPRESSION);
+                CheckType(TokenType.EXPRESSION);
                 token = lexer.getToken();
                 return null;
         }
     }
 
-    private Exp parseBinopRHS(int level, Exp lhs) throws IOException {
+    private Exp parseBinaryOperationRHS(int level, Exp lhs) throws IOException {
         while (true) {
-            Integer val = binopLevels.get(token.getType());
+            Integer val = BinaryOperationLevels.get(token.getType());
+
             int tokenLevel = (val == null) ? -1 : val;
 
+            //check lef hand side procedure is bigger or right hand side
             if (tokenLevel < level)
                 return lhs;
 
-            TokenType binop = token.getType();
-            eat(binop);
+            TokenType BinaryOperation = token.getType();
+            CheckType(BinaryOperation);
 
-            Exp rhs = parsePrimaryExp(); // parse rhs of exp
-            val = binopLevels.get(token.getType());
+            Exp RightHandSide = parsePrimaryExp(); // parse RightHandSide of exp
+            val = BinaryOperationLevels.get(token.getType());
             int nextLevel = (val == null) ? -1 : val;
             if (tokenLevel < nextLevel)
-                rhs = parseBinopRHS(tokenLevel + 1, rhs);
+                RightHandSide = parseBinaryOperationRHS(tokenLevel + 1, RightHandSide);
 
-            switch (binop) {
+            switch (BinaryOperation) {
                 case AND:
-                    lhs = new And(lhs, rhs);
+                    lhs = new And(lhs, RightHandSide);
                     break;
                 case OR:
-                    lhs = new Or(lhs, rhs);
+                    lhs = new Or(lhs, RightHandSide);
                     break;
                 case EQ:
-                    lhs = new Equal(lhs, rhs);
+                    lhs = new Equal(lhs, RightHandSide);
                     break;
                 case NEQ:
-                    lhs = new NotEqual(lhs, rhs);
+                    lhs = new NotEqual(lhs, RightHandSide);
                     break;
                 case LT:
-                    lhs = new LessThan(lhs, rhs);
+                    lhs = new LessThan(lhs, RightHandSide);
                     break;
                 case RT:
-                    lhs = new MoreThan(lhs, rhs);
+                    lhs = new MoreThan(lhs, RightHandSide);
                     break;
                 case LT_EQ:
-                    lhs = new LessThanEqual(lhs, rhs);
+                    lhs = new LessThanEqual(lhs, RightHandSide);
                     break;
                 case RT_EQ:
-                    lhs = new MoreThanEqual(lhs, rhs);
+                    lhs = new MoreThanEqual(lhs, RightHandSide);
                     break;
                 case PLUS:
-                    lhs = new Plus(lhs, rhs);
+                    lhs = new Plus(lhs, RightHandSide);
                     break;
                 case MINUS:
-                    lhs = new Minus(lhs, rhs);
+                    lhs = new Minus(lhs, RightHandSide);
                     break;
                 case TIMES:
-                    lhs = new Times(lhs, rhs);
+                    lhs = new Times(lhs, RightHandSide);
                     break;
                 case DIV:
-                    lhs = new Divide(lhs, rhs);
+                    lhs = new Divide(lhs, RightHandSide);
                     break;
                 case MOD:
-                    lhs = new Modules(lhs, rhs);
+                    lhs = new Modules(lhs, RightHandSide);
                     break;
                 case LBRACKET:
-                    lhs = new ArrayLookup(lhs, rhs);
-                    eat(TokenType.RBRACKET);
+                    lhs = new ArrayLookup(lhs, RightHandSide);
+                    CheckType(TokenType.RBRACKET);
                     break;
                 default:
-                    eat(TokenType.OPERATOR);
+                    CheckType(TokenType.OPERATOR);
                     break;
             }
         }

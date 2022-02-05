@@ -2,94 +2,94 @@ package VisitorPattern;
 
 import AST_Tree.*;
 
-public interface Visitor {
-    public void visit(Program prog);
+ public interface Visitor {
+    void visit(Program prog);
 
-    public void visit(VarDecl var);
+     void visit(VarDecl var);
 
-    public void visit(VarDeclList varList);
+     void visit(VarDeclList varList);
 
-    public void visit(Declarations dec);
+     void visit(Declarations dec);
 
-    public void visit(Formal param);
+     void visit(Formal param);
 
-    public void visit(IntegerArrayType intArrayT);
+     void visit(IntegerArrayType intArrayT);
 
-    public void visit(FloatArrayType floatArrayT);
+     void visit(FloatArrayType floatArrayT);
 
-    public void visit(BooleanArrayType booleanArrayT);
+     void visit(BooleanArrayType booleanArrayT);
 
-    public void visit(CharArrayType charArrayT);
+     void visit(CharArrayType charArrayT);
 
-    public void visit(BooleanType boolT);
+     void visit(BooleanType boolT);
 
-    public void visit(IntegerType intT);
+     void visit(IntegerType intT);
 
-    public void visit(FloatType floatT);
+     void visit(FloatType floatT);
 
-    public void visit(CharType charT);
+     void visit(CharType charT);
 
-    public void visit(IdentifierType idT);
+     void visit(IdentifierType idT);
 
-    public void visit(Block blockStm);
+     void visit(Block blockStm);
 
-    public void visit(If ifStm);
+    void visit(If ifStm);
 
-    public void visit(While whileStm);
+     void visit(While whileStm);
 
-    public void visit(Assign assignStm);
+     void visit(Assign assignStm);
 
-    public void visit(ArrayAssign arrayAssignStm);
+     void visit(ArrayAssign arrayAssignStm);
 
-    public void visit(And andExp);
+     void visit(And andExp);
 
-    public void visit(Or orExp);
+     void visit(Or orExp);
 
-    public void visit(MoreThan moreExp);
+     void visit(MoreThan moreExp);
 
-    public void visit(LessThan lessThanExp);
+     void visit(LessThan lessThanExp);
 
-    public void visit(Equal equalExp);
+     void visit(Equal equalExp);
 
-    public void visit(NotEqual notEqualExp);
+     void visit(NotEqual notEqualExp);
 
-    public void visit(MoreThanEqual moreEqualExp);
+     void visit(MoreThanEqual moreEqualExp);
 
-    public void visit(LessThanEqual lessEqualExp);
+     void visit(LessThanEqual lessEqualExp);
 
-    public void visit(Plus plusExp);
+     void visit(Plus plusExp);
 
-    public void visit(Minus minusExp);
+     void visit(Minus minusExp);
 
-    public void visit(Times timesExp);
+     void visit(Times timesExp);
 
-    public void visit(Divide divExp);
+     void visit(Divide divExp);
 
-    public void visit(Modules modExp);
+     void visit(Modules modExp);
 
-    public void visit(ArrayLookup arrayLookup);
+     void visit(ArrayLookup arrayLookup);
 
-    public void visit(ArrayLength length);
+     void visit(ArrayLength length);
 
-    public void visit(IntegerLiteral intLiteral);
+     void visit(IntegerLiteral intLiteral);
 
-    public void visit(FloatLiteral floatLiteral);
+     void visit(FloatLiteral floatLiteral);
 
-    public void visit(BooleanLiteral booleanLiteral);
+     void visit(BooleanLiteral booleanLiteral);
 
-    public void visit(CharLiteral charLiteral);
+     void visit(CharLiteral charLiteral);
 
-    public void visit(True trueLiteral);
+     void visit(True trueLiteral);
 
-    public void visit(False falseLiteral);
+     void visit(False falseLiteral);
 
-    public void visit(IdentifierExp identExp);
+     void visit(IdentifierExp identExp);
 
-    public void visit(NewArray array);
+     void visit(NewArray array);
 
-    public void visit(Not notExp);
+     void visit(Not notExp);
 
-    public void visit(Negative negExp);
+     void visit(Negative negExp);
 
-    public void visit(Identifier id);
+     void visit(Identifier id);
 }

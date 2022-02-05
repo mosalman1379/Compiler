@@ -1,52 +1,58 @@
 package Lexer;
 
-public class TokenAttribute {
-    private int intVal;
-    private float floatVal;
-    private char charVal;
-    private boolean booleanVal;
-    private String idVal;
 
-    public TokenAttribute() {
-    }
+//this class used for token attribute
+public class TokenAttribute {
+    //for each token we just only one
+    //integer or float or char or bool
+    //or string attribute
+    private int intValue;
+
+    private float floatValue;
+
+    private char charvalue;
+
+    private boolean BooleanValue;
+
+    private String identifierValue;
 
     public TokenAttribute(int intVal) {
-        this.intVal = intVal;
+        this.intValue = intVal;
     }
 
     public TokenAttribute(float floatVal) {
-        this.floatVal = floatVal;
+        this.floatValue = floatVal;
     }
 
     public TokenAttribute(char charVal) {
-        this.charVal = charVal;
+        this.charvalue = charVal;
     }
 
     public TokenAttribute(boolean booleanVal) {
-        this.booleanVal = booleanVal;
+        this.BooleanValue = booleanVal;
     }
 
     public TokenAttribute(String idVal) {
-        this.idVal = idVal;
+        this.identifierValue = idVal;
     }
 
-    public int getIntVal() {
-        return intVal;
+    public int getIntValue() {
+        return intValue;
     }
 
-    public float getFloatVal() {
-        return floatVal;
+    public float getFloatValue() {
+        return floatValue;
     }
 
-    public char getCharVal() {
-        return charVal;
+    public char getCharvalue() {
+        return charvalue;
     }
 
-    public boolean getBooleanVal() {
-        return booleanVal;
+    public boolean getBooleanValue() {
+        return BooleanValue;
     }
 
-    public String getIdVal() {
-        return idVal;
+    public String getIdentifierValue() {
+        return identifierValue;
     }
 }

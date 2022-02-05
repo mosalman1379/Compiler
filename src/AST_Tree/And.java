@@ -3,19 +3,19 @@ package AST_Tree;
 import VisitorPattern.Visitor;
 
 public class And implements Exp {
-	private Exp lhs, rhs;
+	private Exp LeftSide, RightSide;
 
-	public And(Exp lhs, Exp rhs) {
-		this.lhs = lhs;
-		this.rhs = rhs;
+	public And(Exp LeftSide, Exp RightSide) {
+		this.LeftSide = LeftSide;
+		this.RightSide = RightSide;
 	}
 
 	public Exp getLHS() {
-		return lhs;
+		return LeftSide;
 	}
 
 	public Exp getRHS() {
-		return rhs;
+		return RightSide;
 	}
 
 	public void accept(Visitor v) {

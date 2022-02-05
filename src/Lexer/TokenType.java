@@ -1,32 +1,27 @@
 package Lexer;
 
+
+//all of the valid tokens in the Decaf language
 public enum TokenType {
     // binary operators
-    AND, // &&
-    OR, // ||
-    EQ, // ==
-    NEQ, // !=
-    LT, // <
-    RT, // >
-    LT_EQ, // <=
-    RT_EQ, // >=
-    PLUS, // +
-    MINUS, // -
-    TIMES, // *
-    DIV, // /
-    MOD, // %
+    AND, OR, EQ, NEQ, LT, RT, LT_EQ,
+    RT_EQ, PLUS, MINUS, TIMES, DIV, MOD,
 
-    ID, // [a-zA-Z][a-zA-Z0-9_]*
-    INT_CONST, // [0-9]+
-    FLOAT_CONST, //[0-9]+.[0-9]+
+
+    // reserved words
+    MAIN, INT, CHAR, FLOAT,
+    BOOLEAN, IF, ELSE, WHILE,
+
+    ID, // identifier regex: [a-zA-Z][a-zA-Z0-9_]*
+    INT_CONST, // integer regex: [0-9]+
+    FLOAT_CONST, // float regex: [0-9]+.[0-9]+
     CHAR_CONST, //'ASCII Char'
     BOOLEAN_CONST,
-    EOF, // input stream has been consumed
-    UNKNOWN, // character/token could not be processed
+    EOF, // End of File
+    UNKNOWN, // token could not be processed
 
 
-    // punctuation
-
+    // punctuation tokens
     LPAREN, // (
     RPAREN, // )
     LBRACKET, // [
@@ -39,15 +34,6 @@ public enum TokenType {
     NEGATIVE, // -
     NOT, // !
 
-    // reserved words
-    MAIN, // main - relegate as ID (?)
-    INT, // int
-    CHAR, // char
-    FLOAT, // float
-    BOOLEAN, // boolean
-    IF, // if
-    ELSE, // else
-    WHILE, // while
 
     // for error reporting
     STATEMENT,

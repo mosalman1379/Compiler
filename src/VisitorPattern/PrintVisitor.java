@@ -2,20 +2,7 @@ package VisitorPattern;
 
 import AST_Tree.*;
 
-/*
- *
- * Printing for abstract syntax trees. Allows verification that the
- * trees for a program's syntax were properly constructed during the parsing
- * stage. It is utilized by the TestParser class in MiniJava/test.
- *
- */
-
 public class PrintVisitor implements Visitor {
-	@Override
-	public void visit(Program main) {
-		if (main.getList() != null) main.getList().accept(this);
-		System.out.println();
-	}
 
 	@Override
 	public void visit(Declarations decl) {
@@ -27,6 +14,11 @@ public class PrintVisitor implements Visitor {
 		}
 		System.out.println();
 	}
+	@Override
+	public void visit(Program main) {
+		if (main.getList() != null) main.getList().accept(this);
+		System.out.println();
+	}
 
 	@Override
 	public void visit(VarDecl var) {
@@ -36,11 +28,6 @@ public class PrintVisitor implements Visitor {
 		System.out.print(";");
 	}
 
-	@Override
-	public void visit(VarDeclList varList) {
-		if (varList.getList() != null) varList.accept(this);
-		System.out.println();
-	}
 
 	@Override
 	public void visit(Formal param) {
@@ -50,13 +37,9 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(IntegerArrayType intArrayT) {
-		System.out.print("int[]");
-	}
-
-	@Override
-	public void visit(FloatArrayType floatArrayT) {
-		System.out.print("float[]");
+	public void visit(VarDeclList varList) {
+		if (varList.getList() != null) varList.accept(this);
+		System.out.println();
 	}
 
 	@Override
@@ -75,6 +58,16 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(IntegerArrayType intArrayT) {
+		System.out.print("int[]");
+	}
+
+	@Override
+	public void visit(FloatArrayType floatArrayT) {
+		System.out.print("float[]");
+	}
+
+	@Override
 	public void visit(BooleanLiteral booleanLiteral) {
 		System.out.println(booleanLiteral.getValue());
 	}
@@ -90,6 +83,13 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(IdentifierType idT) {
+		if (idT.getName() != null)
+			System.out.print(idT.getName());
+	}
+
+
+	@Override
 	public void visit(CharArrayType charArrayT) {
 		System.out.print("char[]");
 	}
@@ -100,22 +100,16 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(IdentifierType idT) {
-		if (idT.getName() != null)
-			System.out.print(idT.getName());
-	}
-
-	@Override
 	public void visit(Block blockStm) {
 		System.out.println("{");
 
-		if (blockStm.getStms() != null) {
-			for (int i = 0; i < blockStm.getStms().size(); i++) {
-				if (blockStm.getStms().elementAt(i) == null)
+		if (blockStm.getStatements() != null) {
+			for (int i = 0; i < blockStm.getStatements().size(); i++) {
+				if (blockStm.getStatements().elementAt(i) == null)
 					continue;
 
 				System.out.print("\t\t\t");
-				blockStm.getStms().elementAt(i).accept(this);
+				blockStm.getStatements().elementAt(i).accept(this);
 				System.out.println();
 			}
 		}
@@ -138,13 +132,7 @@ public class PrintVisitor implements Visitor {
 		if (ifStm.getFalseStm() != null) ifStm.getFalseStm().accept(this);
 	}
 
-	@Override
-	public void visit(While whileStm) {
-		System.out.print("while (");
-		if (whileStm.getCondExp() != null) whileStm.getCondExp().accept(this);
-		System.out.print(")");
-		if (whileStm.getStm() != null) whileStm.getStm().accept(this);
-	}
+
 
 	@Override
 	public void visit(Assign assignStm) {
@@ -153,7 +141,19 @@ public class PrintVisitor implements Visitor {
 		if (assignStm.getValue() != null) assignStm.getValue().accept(this);
 		System.out.print(";");
 	}
+	private void PrintLeftBrace(){
+		System.out.println("(");
+	}
 
+
+	@Override
+	public void visit(While whileStm) {
+		System.out.print("while (");
+		if (whileStm.getCondExp() != null) whileStm.getCondExp().accept(this);
+		System.out.print(")");
+		if (whileStm.getStm() != null) whileStm.getStm().accept(this);
+	}
+	
 	@Override
 	public void visit(ArrayAssign arrayAssignStm) {
 		if (arrayAssignStm.getId() != null) arrayAssignStm.getId().accept(this);
@@ -164,18 +164,11 @@ public class PrintVisitor implements Visitor {
 		System.out.print(";");
 	}
 
-	@Override
-	public void visit(And andExp) {
-		System.out.print("(");
-		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
-		System.out.print(" && ");
-		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
-		System.out.print(")");
-	}
+
 
 	@Override
 	public void visit(Or andExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
 		System.out.print(" || ");
 		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
@@ -184,7 +177,7 @@ public class PrintVisitor implements Visitor {
 
 	@Override
 	public void visit(Equal andExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
 		System.out.print(" == ");
 		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
@@ -192,8 +185,17 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(And andExp) {
+		PrintLeftBrace();
+		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
+		System.out.print(" && ");
+		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
+		System.out.print(")");
+	}
+
+	@Override
 	public void visit(NotEqual andExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
 		System.out.print(" != ");
 		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
@@ -202,7 +204,7 @@ public class PrintVisitor implements Visitor {
 
 	@Override
 	public void visit(MoreThan andExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
 		System.out.print(" > ");
 		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
@@ -210,17 +212,8 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(MoreThanEqual andExp) {
-		System.out.print("(");
-		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
-		System.out.print(" >= ");
-		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
-		System.out.print(")");
-	}
-
-	@Override
 	public void visit(LessThan lessThanExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (lessThanExp.getLHS() != null) lessThanExp.getLHS().accept(this);
 		System.out.print(" < ");
 		if (lessThanExp.getRHS() != null) lessThanExp.getRHS().accept(this);
@@ -229,7 +222,7 @@ public class PrintVisitor implements Visitor {
 
 	@Override
 	public void visit(LessThanEqual andExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
 		System.out.print(" <= ");
 		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
@@ -237,8 +230,17 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(MoreThanEqual andExp) {
+		PrintLeftBrace();
+		if (andExp.getLHS() != null) andExp.getLHS().accept(this);
+		System.out.print(" >= ");
+		if (andExp.getRHS() != null) andExp.getRHS().accept(this);
+		System.out.print(")");
+	}
+
+	@Override
 	public void visit(Plus plusExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (plusExp.getLHS() != null) plusExp.getLHS().accept(this);
 		System.out.print(" + ");
 		if (plusExp.getRHS() != null) plusExp.getRHS().accept(this);
@@ -246,17 +248,8 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(Minus minusExp) {
-		System.out.print("(");
-		if (minusExp.getLHS() != null) minusExp.getLHS().accept(this);
-		System.out.print(" - ");
-		if (minusExp.getRHS() != null) minusExp.getRHS().accept(this);
-		System.out.print(")");
-	}
-
-	@Override
 	public void visit(Times timesExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (timesExp.getLHS() != null) timesExp.getLHS().accept(this);
 		System.out.print(" * ");
 		if (timesExp.getRHS() != null) timesExp.getRHS().accept(this);
@@ -265,7 +258,7 @@ public class PrintVisitor implements Visitor {
 
 	@Override
 	public void visit(Divide timesExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (timesExp.getLHS() != null) timesExp.getLHS().accept(this);
 		System.out.print(" / ");
 		if (timesExp.getRHS() != null) timesExp.getRHS().accept(this);
@@ -273,8 +266,18 @@ public class PrintVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(Minus minusExp) {
+		PrintLeftBrace();
+		if (minusExp.getLHS() != null) minusExp.getLHS().accept(this);
+		System.out.print(" - ");
+		if (minusExp.getRHS() != null) minusExp.getRHS().accept(this);
+		System.out.print(")");
+	}
+
+
+	@Override
 	public void visit(Modules timesExp) {
-		System.out.print("(");
+		PrintLeftBrace();
 		if (timesExp.getLHS() != null) timesExp.getLHS().accept(this);
 		System.out.print(" % ");
 		if (timesExp.getRHS() != null) timesExp.getRHS().accept(this);

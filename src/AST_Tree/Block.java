@@ -3,14 +3,14 @@ package AST_Tree;
 import VisitorPattern.Visitor;
 
 public class Block implements Statement {
-    private StatementList stms;
+    private StatementList statements;
 
-    public Block(StatementList stms) {
-        this.stms = stms;
+    public Block(StatementList statements) {
+        this.statements = statements;
     }
 
-    public StatementList getStms() {
-        return stms;
+    public StatementList getStatements() {
+        return statements;
     }
 
     public void accept(Visitor v) {

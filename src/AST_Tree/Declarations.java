@@ -16,14 +16,6 @@ public class Declarations {
         getList().add(varDecl);
     }
 
-    public VarDeclList elementAt(int index) {
-        return getList().get(index);
-    }
-
-    public int size() {
-        return getList().size();
-    }
-
     public List<VarDeclList> getList() {
         return list;
     }

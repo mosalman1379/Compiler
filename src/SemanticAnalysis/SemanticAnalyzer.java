@@ -33,12 +33,40 @@ import Parser.Parser;
 public class SemanticAnalyzer {
 
     private Parser parser;
-    private ArrayList<VarDecl> declerations;
+
+
+    private ArrayList<VarDecl> decelerations;
+
     private ArrayList<Identifier> identifiers;
+
     private ArrayList<Assign> assigns;
+
     private ArrayList<Exp> conditions;
 
     private int errors;
+
+    //start semantic analyzer
+    public void analyzeProgram() throws IOException {
+
+        this.parser.parseProgram();
+
+        this.decelerations = this.parser.getDeclarations();
+
+        checkMultipleDeclaration();
+
+        this.identifiers = this.parser.getIdentifier();
+
+        checkIdentifierExist();
+
+        this.assigns = this.parser.getAssignments();
+
+        checkAssigns();
+
+        this.conditions = this.parser.getConditions();
+
+        checkConditions();
+
+    }
 
     public SemanticAnalyzer(FileReader file) throws IOException {
         this.parser = new Parser(file);
@@ -49,44 +77,24 @@ public class SemanticAnalyzer {
         return errors;
     }
 
-    //start semantic analyzer
-    public void analyzeProgram() throws IOException {
-        this.parser.parseProgram();
-        this.declerations = this.parser.getDecelarations();
-        checkDeclerations();
-        this.identifiers = this.parser.getIdentifiers();
-        checkIdenifiers();
-        this.assigns = this.parser.getAssigns();
-        checkAssigns();
-        this.conditions = this.parser.getConditions();
-        checkConditions();
-    }
 
-    // check program declarations
-    private void checkDeclerations() {
-        for (int i = 0; i < declerations.size(); i++) {
-            VarDecl varDecl = declerations.get(i);
+    private void checkMultipleDeclaration() {
+        for (int i = 0; i < decelerations.size(); i++) {
+            VarDecl varDecl = decelerations.get(i);
             String idName = varDecl.getId().getName();
 
-            for (int j = i + 1; j < declerations.size(); j++) {
-                VarDecl _varDecl = declerations.get(j);
+            for (int j = i + 1; j < decelerations.size(); j++) {
+                VarDecl _varDecl = decelerations.get(j);
                 String _idName = _varDecl.getId().getName();
 
+                //if we have multiple declaration we got error
                 if (idName.equals(_idName))
                     error(ErrorType.MULTIPLE_DECLARATION, _idName);
             }
         }
     }
 
-    // check program identifiers
-    private void checkIdenifiers() {
-        for (Identifier identifier : identifiers) {
-            if (!isIdentifierExists(identifier.getName()))
-                error(ErrorType.NO_DECLARATION, identifier.getName());
-        }
-    }
 
-    // check program conditions
     private void checkConditions() {
         for (Exp exp : conditions) {
             if ((exp instanceof MoreThan || exp instanceof MoreThanEqual || exp instanceof LessThan ||
@@ -96,9 +104,23 @@ public class SemanticAnalyzer {
 
     }
 
+    //check identifier exist
+    private void checkIdentifierExist() {
+
+        for (Identifier identifier : identifiers) {
+
+            if (!isIdentifierExists(identifier.getName()))
+
+                error(ErrorType.NO_DECLARATION, identifier.getName());
+
+        }
+
+    }
+
+
     // check if a specific identifier name is exists
     private boolean isIdentifierExists(String name) {
-        for (VarDecl varDecl : declerations) {
+        for (VarDecl varDecl : decelerations) {
             String idName = varDecl.getId().getName();
 
             if (idName.equals(name))
@@ -107,49 +129,58 @@ public class SemanticAnalyzer {
         return false;
     }
 
+
     // type checking of all the assign expressions
     private void checkAssigns() {
         for (Assign assign : assigns) {
+
             Exp type = assign.getValue();
-            String idName = assign.getId().getName();
-            Type idType = getIdentifierType(idName);
 
-            // assign to int
-            if (idType != null && (idType instanceof IntegerType || idType instanceof IntegerArrayType)) {
+            String Id_Name = assign.getId().getName();
 
-                // float to int
-                if (type instanceof FloatLiteral)
-                    error(ErrorType.FLOAT_INT_CASTING, idName);
+            Type Id_Type = getIdentifierType(Id_Name);
 
-                // boolean to int
+            // assign to int for array expressions
+            if ((Id_Type instanceof IntegerType || Id_Type instanceof IntegerArrayType)) {
+
+
+                // boolean to int conversion is invalid
                 if (type instanceof BooleanLiteral)
-                    error(ErrorType.BOOLEAN_INT_CASTING, idName);
+                    error(ErrorType.BOOLEAN_INT_CASTING, Id_Name);
 
-                // type(id) to int
+
+                // float to int conversion is invalid
+                if (type instanceof FloatLiteral)
+                    error(ErrorType.FLOAT_INT_CASTING, Id_Name);
+
+
+                // assign variable to int
                 if (type instanceof IdentifierExp) {
-                    String _idName = ((IdentifierExp) type).getName();
-                    Type _idType = getIdentifierType(_idName);
+                    String ID_Name = ((IdentifierExp) type).getName();
+                    Type ID_Type = getIdentifierType(ID_Name);
 
-                    if (_idType != null) {
-                        // float to int
-                        if (_idType instanceof FloatType)
-                            error(ErrorType.FLOAT_INT_CASTING, idName);
+                    if (ID_Type != null) {
+                        // float to int conversion is invalid
+                        if (ID_Type instanceof FloatType)
+                            error(ErrorType.FLOAT_INT_CASTING, Id_Name);
 
-                            // boolean to int
-                        else if (_idType instanceof BooleanType)
-                            error(ErrorType.BOOLEAN_INT_CASTING, idName);
 
-                        if (idType instanceof IntegerType)
+                            // boolean to int conversion is invalid
+                        else if (ID_Type instanceof BooleanType)
+                            error(ErrorType.BOOLEAN_INT_CASTING, Id_Name);
+
+
+                        if (Id_Type instanceof IntegerType)
                             // identifier with array type
-                            if (_idType instanceof FloatArrayType || _idType instanceof BooleanArrayType
-                                    || _idType instanceof IntegerArrayType || _idType instanceof CharArrayType)
-                                error(ErrorType.ARRAY_TO_SINGLE, idName);
+                            if (ID_Type instanceof FloatArrayType || ID_Type instanceof BooleanArrayType
+                                    || ID_Type instanceof IntegerArrayType || ID_Type instanceof CharArrayType)
+                                error(ErrorType.ARRAY_TO_SINGLE, Id_Name);
 
-                        if (idType instanceof IntegerArrayType)
+                        if (Id_Type instanceof IntegerArrayType)
                             // identifier with single type
-                            if (_idType instanceof FloatType || _idType instanceof BooleanType
-                                    || _idType instanceof IntegerType || _idType instanceof CharType)
-                                error(ErrorType.SINGLE_TO_ARRAY, idName);
+                            if (ID_Type instanceof FloatType || ID_Type instanceof BooleanType
+                                    || ID_Type instanceof IntegerType || ID_Type instanceof CharType)
+                                error(ErrorType.SINGLE_TO_ARRAY, Id_Name);
 
                     }
 
@@ -157,139 +188,142 @@ public class SemanticAnalyzer {
             }
 
             // assign to float
-            if (idType != null && (idType instanceof FloatType || idType instanceof FloatArrayType)) {
+            if ((Id_Type instanceof FloatType || Id_Type instanceof FloatArrayType)) {
 
-                // boolean to float
+                // boolean to float conversion is invalid
                 if (type instanceof BooleanLiteral)
-                    error(ErrorType.BOOLEAN_FLOAT_CASTING, idName);
+                    error(ErrorType.BOOLEAN_FLOAT_CASTING, Id_Name);
 
-                // char to float
+                // char to float conversion is invalid
                 if (type instanceof CharLiteral)
-                    error(ErrorType.CHAR_FLOAT_CASTING, idName);
+                    error(ErrorType.CHAR_FLOAT_CASTING, Id_Name);
 
                 if (type instanceof IdentifierExp) {
 
-                    String _idName = ((IdentifierExp) type).getName();
-                    Type _idType = getIdentifierType(_idName);
+                    String ID_Name = ((IdentifierExp) type).getName();
+                    Type ID_Type = getIdentifierType(ID_Name);
 
-                    if (_idType != null) {
-                        // boolean to float
-                        if (_idType instanceof BooleanType)
-                            error(ErrorType.BOOLEAN_FLOAT_CASTING, idName);
+                    if (ID_Type != null) {
+                        // boolean to float conversion is invalid
+                        if (ID_Type instanceof BooleanType)
+                            error(ErrorType.BOOLEAN_FLOAT_CASTING, Id_Name);
 
-                            // char to float
-                        else if (_idType instanceof CharType)
-                            error(ErrorType.CHAR_FLOAT_CASTING, idName);
+                            // char to float conversion is invalid
+                        else if (ID_Type instanceof CharType)
+                            error(ErrorType.CHAR_FLOAT_CASTING, Id_Name);
 
-                        if (idType instanceof FloatType)
-                            // identifier with array type
-                            if (_idType instanceof FloatArrayType || _idType instanceof BooleanArrayType
-                                    || _idType instanceof IntegerArrayType || _idType instanceof CharArrayType)
-                                error(ErrorType.ARRAY_TO_SINGLE, idName);
-
-                        if (idType instanceof FloatArrayType)
+                        if (Id_Type instanceof FloatArrayType)
                             // identifier with single type
-                            if (_idType instanceof FloatType || _idType instanceof BooleanType
-                                    || _idType instanceof IntegerType || _idType instanceof CharType)
-                                error(ErrorType.SINGLE_TO_ARRAY, idName);
+                            if (ID_Type instanceof FloatType || ID_Type instanceof BooleanType
+                                    || ID_Type instanceof IntegerType || ID_Type instanceof CharType)
+                                error(ErrorType.SINGLE_TO_ARRAY, Id_Name);
+
+                        if (Id_Type instanceof FloatType)
+                            // identifier with array type
+                            if (ID_Type instanceof FloatArrayType || ID_Type instanceof BooleanArrayType
+                                    || ID_Type instanceof IntegerArrayType || ID_Type instanceof CharArrayType)
+                                error(ErrorType.ARRAY_TO_SINGLE, Id_Name);
                     }
                 }
             }
 
             // assign to char
-            if (idType != null && (idType instanceof CharType || idType instanceof CharArrayType)) {
+            if ((Id_Type instanceof CharType || Id_Type instanceof CharArrayType)) {
 
-                //int to char
+                //int to char conversion is invalid
                 if (type instanceof IntegerLiteral)
-                    error(ErrorType.INT_CHAR_CASTING, idName);
+                    error(ErrorType.INT_CHAR_CASTING, Id_Name);
 
-                // float to char
+                // float to char conversion is invalid
                 if (type instanceof FloatLiteral)
-                    error(ErrorType.FLOAT_CHAR_CASTING, idName);
+                    error(ErrorType.FLOAT_CHAR_CASTING, Id_Name);
 
-                // boolean to char
+                // boolean to char conversion is invalid
                 if (type instanceof BooleanLiteral)
-                    error(ErrorType.BOOLEAN_CHAR_CASTING, idName);
+                    error(ErrorType.BOOLEAN_CHAR_CASTING, Id_Name);
 
-                // type(id) to int
+                // type(id) to int conversion is invalid
                 if (type instanceof IdentifierExp) {
-                    String _idName = ((IdentifierExp) type).getName();
-                    Type _idType = getIdentifierType(_idName);
 
-                    if (_idType != null) {
+                    String ID_Name = ((IdentifierExp) type).getName();
 
-                        // float to char
-                        if (_idType instanceof FloatType)
-                            error(ErrorType.FLOAT_CHAR_CASTING, idName);
+                    Type ID_Type = getIdentifierType(ID_Name);
 
-                            // int to char
-                        else if (_idType instanceof IntegerType)
-                            error(ErrorType.INT_CHAR_CASTING, idName);
+                    if (ID_Type != null) {
 
-                            // boolean to char
-                        else if (_idType instanceof BooleanType)
-                            error(ErrorType.BOOLEAN_CHAR_CASTING, idName);
+                        // float to char conversion is invalid
+                        if (ID_Type instanceof FloatType)
+                            error(ErrorType.FLOAT_CHAR_CASTING, Id_Name);
 
-                        if (idType instanceof CharType)
-                            // identifier with array type
-                            if (_idType instanceof FloatArrayType || _idType instanceof BooleanArrayType
-                                    || _idType instanceof IntegerArrayType || _idType instanceof CharArrayType)
-                                error(ErrorType.ARRAY_TO_SINGLE, idName);
+                            // int to char conversion is invalid
+                        else if (ID_Type instanceof IntegerType)
+                            error(ErrorType.INT_CHAR_CASTING, Id_Name);
 
-                        if (idType instanceof CharArrayType)
+                            // boolean to char conversion is invalid
+                        else if (ID_Type instanceof BooleanType)
+                            error(ErrorType.BOOLEAN_CHAR_CASTING, Id_Name);
+
+                        if (Id_Type instanceof CharArrayType)
                             // identifier with single type
-                            if (_idType instanceof FloatType || _idType instanceof BooleanType
-                                    || _idType instanceof IntegerType || _idType instanceof CharType)
-                                error(ErrorType.SINGLE_TO_ARRAY, idName);
+                            if (ID_Type instanceof FloatType || ID_Type instanceof BooleanType
+                                    || ID_Type instanceof IntegerType || ID_Type instanceof CharType)
+                                error(ErrorType.SINGLE_TO_ARRAY, Id_Name);
+
+                        if (Id_Type instanceof CharType)
+                            // identifier with array type
+                            if (ID_Type instanceof FloatArrayType || ID_Type instanceof BooleanArrayType
+                                    || ID_Type instanceof IntegerArrayType || ID_Type instanceof CharArrayType)
+                                error(ErrorType.ARRAY_TO_SINGLE, Id_Name);
                     }
 
                 }
             }
 
             // assign to boolean
-            if (idType != null && (idType instanceof BooleanType || idType instanceof BooleanArrayType)) {
-                //int to boolean
+            if ((Id_Type instanceof BooleanType || Id_Type instanceof BooleanArrayType)) {
+                //int to boolean conversion is invalid
                 if (type instanceof IntegerLiteral)
-                    error(ErrorType.INT_BOOLEAN_CASTING, idName);
+                    error(ErrorType.INT_BOOLEAN_CASTING, Id_Name);
 
-                // float to boolean
-                if (type instanceof FloatLiteral)
-                    error(ErrorType.FLOAT_BOOLEAN_CASTING, idName);
 
-                // char to boolean
+                // char to boolean conversion is invalid
                 if (type instanceof CharLiteral)
-                    error(ErrorType.CHAR_BOOLEAN_CASTING, idName);
+                    error(ErrorType.CHAR_BOOLEAN_CASTING, Id_Name);
 
-                // type(id) to int
+
+                // float to boolean conversion is invalid
+                if (type instanceof FloatLiteral)
+                    error(ErrorType.FLOAT_BOOLEAN_CASTING, Id_Name);
+
+                // type(id) to int conversion is invalid
                 if (type instanceof IdentifierExp) {
                     String _idName = ((IdentifierExp) type).getName();
                     Type _idType = getIdentifierType(_idName);
 
                     if (_idType != null) {
 
-                        // float to boolean
+                        // float to boolean conversion is invalid
                         if (_idType instanceof FloatType)
-                            error(ErrorType.FLOAT_CHAR_CASTING, idName);
+                            error(ErrorType.FLOAT_CHAR_CASTING, Id_Name);
 
-                            // int to boolean
+                            // int to boolean conversion is invalid
                         else if (_idType instanceof IntegerType)
-                            error(ErrorType.INT_CHAR_CASTING, idName);
+                            error(ErrorType.INT_CHAR_CASTING, Id_Name);
 
-                            // char to boolean
+                            // char to boolean conversion is invalid
                         else if (_idType instanceof CharType)
-                            error(ErrorType.CHAR_BOOLEAN_CASTING, idName);
+                            error(ErrorType.CHAR_BOOLEAN_CASTING, Id_Name);
 
-                        if (idType instanceof BooleanType)
+                        if (Id_Type instanceof BooleanType)
                             // identifier with array type
                             if (_idType instanceof FloatArrayType || _idType instanceof BooleanArrayType
                                     || _idType instanceof IntegerArrayType || _idType instanceof CharArrayType)
-                                error(ErrorType.ARRAY_TO_SINGLE, idName);
+                                error(ErrorType.ARRAY_TO_SINGLE, Id_Name);
 
                         if (_idType instanceof BooleanArrayType)
-                            // identifier with single type
-                            if (_idType instanceof FloatType || _idType instanceof BooleanType
-                                    || _idType instanceof IntegerType || _idType instanceof CharType)
-                                error(ErrorType.SINGLE_TO_ARRAY, idName);
+                        // identifier with single type
+                        {
+                        }
                     }
 
                 }
@@ -298,14 +332,18 @@ public class SemanticAnalyzer {
         }
     }
 
-    // get identifier type (IntegerType | IntegerArrayType | FloatType | FloatArrayType | CharType | CharArrayType)
+    // get identifier type with name
     private Type getIdentifierType(String name) {
-        for (VarDecl dec : declerations) {
-            Identifier id = dec.getId();
-            if (id.getName().equals(name))
-                return dec.getType();
-        }
 
+        for (VarDecl dec : decelerations) {
+
+            Identifier id = dec.getId();
+
+            if (id.getName().equals(name))
+
+                return dec.getType();
+
+        }
         return null;
     }
 
