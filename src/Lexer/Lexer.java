@@ -189,7 +189,7 @@ public class Lexer {
                     nextChar = getChar();
                 }
                 //examples 12.
-                return new Token(TokenType.UNKNOWN, new TokenAttribute(0), lineNumber, columnNumber - numString.length() + 1);
+                return new Token(TokenType.UNKNOWN, new TokenAttribute(), lineNumber, columnNumber - numString.length() + 1);
             }
             //otherwise it is Integer constant token
             return new Token(TokenType.INT_CONST, new TokenAttribute(Integer.parseInt(numString.toString())), lineNumber, columnNumber - numString.length());
@@ -214,13 +214,13 @@ public class Lexer {
                 }
                 stream.reset();
             }
-            return new Token(TokenType.UNKNOWN, new TokenAttribute(0), lineNumber, columnNumber - 1);
+            return new Token(TokenType.UNKNOWN, new TokenAttribute(), lineNumber, columnNumber - 1);
         }
 
 
         //-1 show we read whole file
         if (nextChar == -1)
-            return new Token(TokenType.EOF, new TokenAttribute(0), lineNumber, columnNumber);
+            return new Token(TokenType.EOF, new TokenAttribute(), lineNumber, columnNumber);
 
         //in this switch case we detect operators
         switch (nextChar) {
@@ -232,9 +232,9 @@ public class Lexer {
                 // check if next char is '|' to match '||' binop
                 if (nextChar == '|') {
                     nextChar = getChar();
-                    return new Token(TokenType.OR, new TokenAttribute(true), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.OR, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.UNKNOWN, new TokenAttribute(true), lineNumber, columnNumber - 1);
+                    return new Token(TokenType.UNKNOWN, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '&':
                 columnNumber++;
@@ -242,9 +242,9 @@ public class Lexer {
 
                 if (nextChar == '&') {
                     nextChar = getChar();
-                    return new Token(TokenType.AND, new TokenAttribute(0), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.AND, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.UNKNOWN, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                    return new Token(TokenType.UNKNOWN, new TokenAttribute(), lineNumber, columnNumber - 1);
 
 
             case '=':
@@ -253,9 +253,9 @@ public class Lexer {
 
                 if (nextChar == '=') {
                     nextChar = getChar();
-                    return new Token(TokenType.EQ, new TokenAttribute(true), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.EQ, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.ASSIGN, new TokenAttribute(true), lineNumber, columnNumber - 1);
+                    return new Token(TokenType.ASSIGN, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '!':
                 columnNumber++;
@@ -263,9 +263,9 @@ public class Lexer {
 
                 if (nextChar == '=') {
                     nextChar = getChar();
-                    return new Token(TokenType.NEQ, new TokenAttribute(true), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.NEQ, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.NOT, new TokenAttribute(true), lineNumber, columnNumber - 1);
+                    return new Token(TokenType.NOT, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '<':
                 columnNumber++;
@@ -273,9 +273,9 @@ public class Lexer {
 
                 if (nextChar == '=') {
                     nextChar = getChar();
-                    return new Token(TokenType.LT_EQ, new TokenAttribute(true), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.LT_EQ, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.LT, new TokenAttribute(true), lineNumber, columnNumber - 1);
+                    return new Token(TokenType.LT, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '>':
                 columnNumber++;
@@ -283,43 +283,43 @@ public class Lexer {
 
                 if (nextChar == '=') {
                     nextChar = getChar();
-                    return new Token(TokenType.RT_EQ, new TokenAttribute(true), lineNumber, columnNumber - 2);
+                    return new Token(TokenType.RT_EQ, new TokenAttribute(), lineNumber, columnNumber - 2);
                 } else
-                    return new Token(TokenType.RT, new TokenAttribute(true
+                    return new Token(TokenType.RT, new TokenAttribute(
                     ), lineNumber, columnNumber - 1);
 
             case '-':
                 columnNumber++;
                 nextChar = getChar();
-                return new Token(TokenType.MINUS, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                return new Token(TokenType.MINUS, new TokenAttribute(), lineNumber, columnNumber - 1);
 
 
             case '+':
                 columnNumber++;
                 nextChar = getChar();
-                return new Token(TokenType.PLUS, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                return new Token(TokenType.PLUS, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '*':
                 columnNumber++;
                 nextChar = getChar();
-                return new Token(TokenType.TIMES, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                return new Token(TokenType.TIMES, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '/':
                 columnNumber++;
                 nextChar = getChar();
-                return new Token(TokenType.DIV, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                return new Token(TokenType.DIV, new TokenAttribute(), lineNumber, columnNumber - 1);
 
             case '%':
                 columnNumber++;
                 nextChar = getChar();
-                return new Token(TokenType.MOD, new TokenAttribute(0), lineNumber, columnNumber - 1);
+                return new Token(TokenType.MOD, new TokenAttribute(), lineNumber, columnNumber - 1);
         }
 
         TokenType type = punctuation.get((char) nextChar);
         columnNumber++;
         nextChar = getChar();
 
-        return new Token(Objects.requireNonNullElse(type, TokenType.UNKNOWN), new TokenAttribute(0), lineNumber, columnNumber - 1);
+        return new Token(Objects.requireNonNullElse(type, TokenType.UNKNOWN), new TokenAttribute(), lineNumber, columnNumber - 1);
 
     }
 }

@@ -36,6 +36,7 @@ public class TokenAttribute {
         this.identifierValue = idVal;
     }
 
+    public TokenAttribute(){}
     public int getIntValue() {
         return intValue;
     }
